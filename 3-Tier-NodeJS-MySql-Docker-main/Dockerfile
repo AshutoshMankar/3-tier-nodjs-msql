@@ -1,17 +1,19 @@
-# Use an alpine Node.js runtime as a parent image
 FROM node:14-alpine
 
 # Set the working directory in the container for the client
 WORKDIR /usr/src/app/client
 
-# Copy the client package.json and package-lock.json
+# Copy package.json and package-lock.json
 COPY client/package*.json ./
 
-# Install the client dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the client source code
+# Copy the rest of the client application
 COPY client/ ./
+
+# Set correct permissions
+RUN chmod -R 755 node_modules/.bin
 
 # Build the client application
 RUN npm run build
@@ -19,21 +21,17 @@ RUN npm run build
 # Set the working directory in the container for the server
 WORKDIR /usr/src/app/server
 
-# Copy the server package.json and package-lock.json
+# Copy package.json and package-lock.json
 COPY server/package*.json ./
 
-# Install the server dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the server source code
+# Copy the rest of the server application
 COPY server/ ./
 
-# Copy the client build files to the server's public directory
-RUN mkdir -p ./public && cp -R /usr/src/app/client/dist/* ./public/
+# Expose the port the app runs on
+EXPOSE 3000
 
-# Expose the port the server will run on
-EXPOSE 5000
-
-# Command to run the server
+# Start the application
 CMD ["npm", "start"]
-
